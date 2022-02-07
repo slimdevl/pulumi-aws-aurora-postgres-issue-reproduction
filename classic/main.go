@@ -23,14 +23,13 @@ func main() {
 		availabilityZones := []string{"us-east-1a", "us-east-1b"}
 		subnets := make([]string, 2)
 		for _, id := range subnetIds.Ids {
-			subnets = append(subnets, id)
 			selected, err := ec2.LookupSubnet(ctx, &ec2.LookupSubnetArgs{
 				Id: &id,
 			}, nil)
 			if err != nil {
 				return err
 			}
-			if selected.DefaultForAz == true { // force alignment with indexes of AZ
+			if selected.DefaultForAz { // force alignment with indexes of AZ
 				if selected.AvailabilityZone == "us-east-1a" {
 					subnets[0] = selected.Id
 				} else if selected.AvailabilityZone == "us-east-1b" {
@@ -61,7 +60,6 @@ func main() {
 			&rds.ParameterGroupArgs{
 				Description: pulumi.StringPtr("aurora postgres 12 parameter groupu"),
 				Family:      pulumi.String("aurora-postgresql12"),
-				Name:        pulumi.String("aurora-postgresql12"),
 				Parameters: rds.ParameterGroupParameterArray{
 					&rds.ParameterGroupParameterArgs{
 						Name:  pulumi.String("log_rotation_age"),
@@ -81,8 +79,8 @@ func main() {
 		// Create a cluster
 		cluster, err := rds.NewCluster(ctx, "aws-classic-postgres-db-cluster",
 			&rds.ClusterArgs{
-				ClusterIdentifier:        pulumi.String("postgres-db-cluster"),
-				AvailabilityZones:        pulumi.ToStringArray(availabilityZones),
+				ClusterIdentifier: pulumi.String("postgres-db-cluster"),
+				//AvailabilityZones:        pulumi.ToStringArray(availabilityZones),
 				BackupRetentionPeriod:    pulumi.Int(5),
 				AllowMajorVersionUpgrade: pulumi.BoolPtr(true),
 				DatabaseName:             pulumi.String("example"),
